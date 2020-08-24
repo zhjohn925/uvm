@@ -1,7 +1,11 @@
 // One sequencer can start many sequences
+// - sequence arbitration is done when start() is called
+// - transaction arbitration is done in `uvm_do_pri() and `uvm_do_pri_with()
+// The priority value must be greater or equal to -1.  the higher priority with the greater value 
+//
 // `uvm_do(), `uvm_do_with() to run transactions having default priority (-1)
 // `uvm_do_pri(), `uvm_do_pri_with() can specify transaction priority. 
-// The priority value must be greater or equal to -1.  the higher priority with the greater value  
+//  
 task my_case0::main_phase(uvm_phase phase);
   sequence0 seq0;
   sequence1 seq1;
@@ -9,10 +13,14 @@ task my_case0::main_phase(uvm_phase phase);
   seq0.starting_phase = phase;
   seq1 = new("seq1");
   seq1.starting_phase = phase;
+  env.i_agt.sqr.set_arbitration(SEQ_ARB_STRICT_FIFO);
   fork
     //sequencer starts seq0 and seq1
     seq0.start(env.i_agt.sqr);
     seq1.start(env.i_agt.sqr);
+    //OR, add priority, null is parent sequence
+    // seq0.start(env.i_agt.sqr, null, 100);
+    // seq1.start(env.i_agt.sqr, null, 200);
   join
 endtask
 
